@@ -12,6 +12,9 @@ from .models import Transaction, Budget, Goal
 from .serializers import TransactionSerializer, BudgetSerializer, GoalSerializer
 from .utils import generate_upi_link, parse_sms_data
 
+from .models import RecurringExpense
+from datetime import timedelta
+
 
 class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()
@@ -126,3 +129,44 @@ def logout_user(request):
     request.user.auth_token.delete()
     logout(request)
     return Response({'success': 'Logged out'})
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def suggest_budget(request):
+    user = request.user
+    current_month = timezone.now().month
+    current_year = timezone.now().year
+
+    expenses = Transaction.objects.filter(
+        user=user, type='Expense',
+        date_time__year=current_year,
+        date_time__month=current_month
+    )
+
+    category_totals = {}
+    for tx in expenses:
+        category_totals[tx.category] = category_totals.get(tx.category, 0) + float(tx.amount)
+
+    suggestions = []
+    for category, total in category_totals.items():
+        suggested = round(total * 1.1, 2)  # 10% buffer
+        suggestions.append({'category': category, 'suggested_budget': suggested})
+
+    return Response({'suggestions': suggestions})
+
+
+def detect_recurring(user, merchant, amount):
+    similar = Transaction.objects.filter(user=user, description__icontains=merchant).order_by('-date_time')[:3]
+    if similar.count() >= 3:
+        avg_amount = sum(tx.amount for tx in similar) / len(similar)
+        gap = (similar[0].date_time - similar[1].date_time).days
+        freq = 'Monthly' if 25 <= gap <= 35 else 'Weekly' if 6 <= gap <= 8 else 'Irregular'
+        RecurringExpense.objects.update_or_create(
+            user=user, merchant=merchant,
+            defaults={'average_amount': avg_amount, 'frequency': freq, 'next_due_date': timezone.now().date() + timedelta(days=gap)}
+        )
+
+# Call it in perform_create of TransactionViewSet
+def perform_create(self, serializer):
+    transaction = serializer.save(user=self.request.user)
+    detect_recurring(self.request.user, transaction.description, transaction.amount)

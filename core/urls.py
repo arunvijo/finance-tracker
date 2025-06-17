@@ -15,4 +15,6 @@ urlpatterns = [
     path('register/', register_user),
     path('login/', CustomLoginView.as_view()),
     path('logout/', logout_user),
+    path('suggest-budget/', suggest_budget),
+
 ]
