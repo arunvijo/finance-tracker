@@ -2,40 +2,73 @@
 {% block title %}Transactions{% endblock %}
 {% block content %}
 <div class="page">
-  <h2>Transactions</h2>
-  <form method="post" class="form">
-    {% csrf_token %}
-    <label>Type</label>
-    <select name="type">
-      <option value="Expense">Expense</option>
-      <option value="Income">Income</option>
-    </select>
-
-    <label>Amount</label>
-    <input type="number" name="amount" required>
-
-    <label>Category</label>
-    <select name="category">
-      <option>Food</option>
-      <option>Transport</option>
-      <option>Rent</option>
-      <option>Shopping</option>
-      <option>Health</option>
-      <option>Other</option>
-    </select>
-
-    <label>Description</label>
-    <input type="text" name="description">
-
-    <button type="submit">Add</button>
-  </form>
-  <hr>
-  <ul class="list">
-    {% for tx in transactions %}
-      <li>{{ tx.date_time|date:"d M Y" }} - ₹{{ tx.amount }} ({{ tx.category }})</li>
-    {% empty %}
-      <li>No transactions found.</li>
-    {% endfor %}
-  </ul>
+  <h2 class="page-title">Transactions</h2>
+  <div class="card">
+    <form method="post" class="form-grid">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="type">Type</label>
+        <select name="type" id="type">
+          <option value="Expense">Expense</option>
+          <option value="Income">Income</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="amount">Amount</label>
+        <input type="number" name="amount" id="amount" required>
+      </div>
+      <div class="form-group">
+        <label for="category">Category</label>
+        <select name="category" id="category">
+          <option>Food</option>
+          <option>Transport</option>
+          <option>Rent</option>
+          <option>Shopping</option>
+          <option>Health</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group full-width">
+        <label for="description">Description</label>
+        <input type="text" name="description" id="description">
+      </div>
+      <div class="form-actions full-width">
+        <button type="submit" class="btn-primary">➕ Add Transaction</button>
+      </div>
+    </form>
+  </div>
+  <h3 class="section-title">All Transactions</h3>
+  <div class="transaction-table card">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Amount</th>
+          <th>Category</th>
+          <th>Description</th>
+          <th>Status</th>
+          <th>Auto</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tx in transactions %}
+        <tr>
+          <td>{{ tx.date_time|date:"d M Y H:i" }}</td>
+          <td>{{ tx.type }}</td>
+          <td>₹{{ tx.amount }}</td>
+          <td>{{ tx.category }}</td>
+          <td>{{ tx.description|default:"-" }}</td>
+          <td><span class="badge {{ tx.status|lower }}">{{ tx.status }}</span></td>
+          <td>{% if tx.is_auto_logged %}✅{% else %}❌{% endif %}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7">No transactions found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}

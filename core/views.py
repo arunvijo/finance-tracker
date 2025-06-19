@@ -160,8 +160,10 @@ def dashboard_view(request):
 
 @login_required
 def transactions_page(request):
-    transactions = Transaction.objects.filter(user=request.user).order_by('-date_time')
+    # Shows all transactions, not just current user's
+    transactions = Transaction.objects.all().order_by('-date_time')
     return render(request, 'transactions.html', {'transactions': transactions})
+
 
 
 @login_required

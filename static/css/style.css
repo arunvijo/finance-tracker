@@ -139,3 +139,329 @@ nav a.active {
   margin-left: 0 !important;
   width: 100%;
 }
+
+
+/* General page layout */
+.page {
+  padding: 2rem;
+}
+
+.page-title {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+/* Card container */
+.card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+/* Form layout */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+input, select {
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+}
+
+/* Submit button */
+.btn-primary {
+  background-color: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 0.7rem 1.2rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #1e40af;
+}
+
+/* Section headings */
+.section-title {
+  font-size: 1.4rem;
+  margin: 1rem 0 0.5rem;
+}
+
+/* Transaction Table */
+.transaction-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.transaction-table th,
+.transaction-table td {
+  text-align: left;
+  padding: 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.95rem;
+}
+
+.transaction-table thead {
+  background-color: #f1f5f9;
+}
+
+/* Status badges */
+.badge {
+  display: inline-block;
+  padding: 0.3rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.badge.paid {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.badge.pending {
+  background-color: #fef9c3;
+  color: #ca8a04;
+}
+
+
+/* General page layout */
+.page {
+  padding: 2rem;
+}
+
+.page-title {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+/* Card container */
+.card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+/* Form layout */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+input, select {
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+}
+
+/* Submit button */
+.btn-primary {
+  background-color: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 0.7rem 1.2rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #1e40af;
+}
+
+/* Section headings */
+.section-title {
+  font-size: 1.4rem;
+  margin: 1rem 0 0.5rem;
+}
+
+/* Transaction Table */
+.transaction-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.transaction-table th,
+.transaction-table td {
+  text-align: left;
+  padding: 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.95rem;
+}
+
+.transaction-table thead {
+  background-color: #f1f5f9;
+}
+
+/* Status badges */
+.badge {
+  display: inline-block;
+  padding: 0.3rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.badge.paid {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.badge.pending {
+  background-color: #fef9c3;
+  color: #ca8a04;
+}
+
+
+/* Login Page Styles */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 40px);
+  padding: 2rem;
+}
+
+.auth-box {
+  background: #ffffff;
+  padding: 2.5rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  max-width: 420px;
+  width: 100%;
+}
+
+.auth-title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  text-align: center;
+  color: #111827;
+}
+
+.auth-subtitle {
+  font-size: 1rem;
+  color: #6b7280;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.auth-form label {
+  font-weight: 500;
+  margin-bottom: 0.3rem;
+  color: #374151;
+}
+
+.auth-form input {
+  padding: 0.65rem 0.9rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: #f9fafb;
+  transition: border 0.3s;
+}
+
+.auth-form input:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.btn-login {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.btn-login:hover {
+  background-color: #1e40af;
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.95rem;
+}
+
+.auth-footer a {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+}
+
+/* Messages */
+.alert {
+  padding: 0.6rem;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.alert.success {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.alert.error {
+  background-color: #fee2e2;
+  color: #991b1b;
+}

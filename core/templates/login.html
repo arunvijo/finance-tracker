@@ -3,30 +3,34 @@
 {% block title %}Login - Finance Tracker{% endblock %}
 
 {% block content %}
-  <div class="auth-card">
-    <h2>Login</h2>
+<div class="auth-container">
+  <div class="auth-box">
+    <h2 class="auth-title">Welcome Back 👋</h2>
+    <p class="auth-subtitle">Log in to your account</p>
 
     {% if messages %}
       <div class="messages">
         {% for message in messages %}
-          <div class="alert {{ message.tags }}">
-            {{ message }}
-          </div>
+          <div class="alert {{ message.tags }}">{{ message }}</div>
         {% endfor %}
       </div>
     {% endif %}
 
-    <form method="post" action="{% url 'login' %}">
+    <form method="post" action="{% url 'login' %}" class="auth-form">
       {% csrf_token %}
-      <label>Username</label>
-      <input type="text" name="username" required>
+      <label for="username">Username</label>
+      <input type="text" id="username" name="username" required>
 
-      <label>Password</label>
-      <input type="password" name="password" required>
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required>
 
-      <button type="submit">Login</button>
+      <button type="submit" class="btn-login">🔓 Login</button>
     </form>
 
-    <p>Don't have an account? <a href="{% url 'register' %}">Register here</a></p>
+    <p class="auth-footer">
+      Don’t have an account?
+      <a href="{% url 'register' %}">Register here</a>
+    </p>
   </div>
+</div>
 {% endblock %}
