@@ -2,19 +2,61 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 <div class="dashboard">
-  <h1>Welcome, {{ username }}</h1>
+  <h1 class="page-title">Welcome, 👋 {{ request.user.username }}</h1>
 
-  <section class="card">
-    <h2>Quick Access</h2>
-    <div class="quick-links">
-      <a href="{% url 'transactions_page' %}" class="button">Transactions</a>
-      <a href="{% url 'budgets_page' %}" class="button">Budgets</a>
-      <a href="{% url 'goals_page' %}" class="button">Goals</a>
-      <a href="{% url 'upi_page' %}" class="button">UPI</a>
-      <a href="{% url 'sms_page' %}" class="button">SMS Parser</a>
-      <a href="{% url 'health_score_page' %}" class="button">Health Score</a>
-      <a href="{% url 'private_mode_page' %}" class="button">Private Mode</a>
-    </div>
-  </section>
+  <div class="dashboard-grid">
+    <!-- Recent Transactions -->
+    <section class="card dashboard-section">
+      <h2 class="section-title">🧾 Recent Transactions</h2>
+      {% if recent_transactions %}
+        <ul class="simple-list">
+          {% for tx in recent_transactions %}
+            <li>📅 {{ tx.date_time|date:"d M Y" }} — ₹{{ tx.amount }} ({{ tx.category }})</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty">No recent transactions.</p>
+      {% endif %}
+    </section>
+
+    <!-- Budgets -->
+    <section class="card dashboard-section">
+      <h2 class="section-title">💰 This Month's Budgets</h2>
+      {% if recent_budgets %}
+        <ul class="simple-list">
+          {% for budget in recent_budgets %}
+            <li>📌 {{ budget.category }} — ₹{{ budget.amount }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty">No budgets set.</p>
+      {% endif %}
+    </section>
+
+    <!-- Goals -->
+    <section class="card dashboard-section">
+      <h2 class="section-title">🎯 Goals</h2>
+      {% if goals %}
+        <ul class="simple-list">
+          {% for goal in goals %}
+            <li>🏁 {{ goal.title }} — ₹{{ goal.current_amount }}/₹{{ goal.target_amount }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty">No active goals.</p>
+      {% endif %}
+    </section>
+
+    <!-- Quick Actions -->
+    <section class="card dashboard-section">
+      <h2 class="section-title">🚀 Quick Actions</h2>
+      <div class="quick-links">
+        <a href="{% url 'upi_page' %}" class="button">📤 Generate UPI Link</a>
+        <a href="{% url 'sms_page' %}" class="button">📩 Parse SMS Transaction</a>
+        <a href="{% url 'health_score_page' %}" class="button">🧠 Financial Health Score</a>
+        <a href="{% url 'private_mode_page' %}" class="button">🕵️‍♂️ Toggle Private Mode</a>
+      </div>
+    </section>
+  </div>
 </div>
 {% endblock %}

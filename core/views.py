@@ -143,20 +143,14 @@ def login_view(request):
 
 @login_required
 def dashboard_view(request):
-    user = request.user
-    now = timezone.now()
-
-    transactions = Transaction.objects.filter(user=user).order_by('-date_time')[:5]
-    budgets = Budget.objects.filter(user=user, month=now.month, year=now.year)
-    goals = Goal.objects.filter(user=user)
-
+    recent_transactions = Transaction.objects.filter(user=request.user).order_by('-date_time')[:5]
+    recent_budgets = Budget.objects.filter(user=request.user).order_by('-id')[:5]
+    goals = Goal.objects.filter(user=request.user).order_by('-id')[:5]
     return render(request, 'dashboard.html', {
-        'transactions': transactions,
-        'budgets': budgets,
+        'recent_transactions': recent_transactions,
+        'recent_budgets': recent_budgets,
         'goals': goals,
-        'username': user.username
     })
-
 
 @login_required
 def transactions_page(request):
