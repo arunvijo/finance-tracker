@@ -1,69 +1,45 @@
 {% extends 'base.html' %}
-
-{% block title %}Dashboard - Finance Tracker{% endblock %}
+{% block title %}Generate UPI Link - Finance Tracker{% endblock %}
 
 {% block content %}
-<div class="auth-card">
-  <h2>Welcome, {{ username }} 👋</h2>
-  <hr>
+<div class="card">
+  <h2 class="page-title">📤 Generate UPI Payment Link</h2>
 
-  <!-- Recent Transactions -->
-  <h3>🧾 Recent Transactions</h3>
-  {% if transactions %}
-    <ul>
-      {% for tx in transactions %}
-        <li>{{ tx.date_time|date:"d M Y" }} - ₹{{ tx.amount }} ({{ tx.category }})</li>
-      {% endfor %}
-    </ul>
-    <a href="{% url 'transactions_page' %}">View All Transactions</a>
-  {% else %}
-    <p>No recent transactions.</p>
+  {% if upi_link %}
+    <div class="alert success">
+      ✅ UPI Link Generated:
+      <br>
+      <a href="{{ upi_link }}" target="_blank" class="text-link">{{ upi_link }}</a>
+    </div>
+  {% elif error %}
+    <div class="alert error">{{ error }}</div>
   {% endif %}
-  <hr>
 
-  <!-- Budgets -->
-  <h3>💰 This Month's Budgets</h3>
-  {% if budgets %}
-    <ul>
-      {% for b in budgets %}
-        <li>{{ b.category }} - ₹{{ b.amount }}</li>
-      {% endfor %}
-    </ul>
-    <a href="{% url 'budgets_page' %}">View All Budgets</a>
-  {% else %}
-    <p>No budgets set.</p>
-  {% endif %}
-  <hr>
-
-  <!-- Goals -->
-  <h3>🎯 Goals</h3>
-  {% if goals %}
-    <ul>
-      {% for goal in goals %}
-        <li>{{ goal.title }} — ₹{{ goal.saved_amount }} / ₹{{ goal.target_amount }}</li>
-      {% endfor %}
-    </ul>
-    <a href="{% url 'goals_page' %}">View All Goals</a>
-  {% else %}
-    <p>No active goals.</p>
-  {% endif %}
-  <hr>
-
-  <!-- Feature Links -->
-  <h3>🚀 Quick Actions</h3>
-  <ul>
-    <li><a href="{% url 'upi_page' %}">📤 Generate UPI Link</a></li>
-    <li><a href="{% url 'sms_page' %}">📩 Parse SMS Transaction</a></li>
-    <li><a href="{% url 'health_score_page' %}">🧠 Financial Health Score</a></li>
-    <li><a href="{% url 'private_mode_page' %}">🕵️‍♂️ Toggle Private Mode</a></li>
-  </ul>
-
-  <hr>
-
-  <!-- Logout -->
-  <form method="post" action="{% url 'logout' %}">
+  <form method="post" class="form-grid" action="{% url 'generate_upi_page' %}">
     {% csrf_token %}
-    <button type="submit">Logout</button>
+    <div class="form-group">
+      <label for="upi_id">Recipient UPI ID</label>
+      <input type="text" id="upi_id" name="upi_id" placeholder="example@okhdfcbank" required>
+    </div>
+
+    <div class="form-group">
+      <label for="name">Recipient Name</label>
+      <input type="text" id="name" name="name" placeholder="John Doe" required>
+    </div>
+
+    <div class="form-group">
+      <label for="amount">Amount (₹)</label>
+      <input type="number" id="amount" name="amount" step="0.01" required>
+    </div>
+
+    <div class="form-group full-width">
+      <label for="note">Note (Optional)</label>
+      <input type="text" id="note" name="note" placeholder="Payment for dinner">
+    </div>
+
+    <div class="form-group full-width">
+      <button type="submit" class="btn-primary">Generate Link</button>
+    </div>
   </form>
 </div>
 {% endblock %}

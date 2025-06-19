@@ -1,17 +1,23 @@
 {% extends 'base.html' %}
 {% block title %}Dashboard{% endblock %}
+
 {% block content %}
 <div class="dashboard">
-  <h1 class="page-title">Welcome, 👋 {{ request.user.username }}</h1>
+  <h1 class="page-title">Welcome, {{ request.user.username }} 👋</h1>
 
   <div class="dashboard-grid">
+
     <!-- Recent Transactions -->
     <section class="card dashboard-section">
-      <h2 class="section-title">🧾 Recent Transactions</h2>
+      <h2 class="section-title">
+        <a href="{% url 'transactions_page' %}">
+          <i class="fas fa-receipt"></i> Recent Transactions
+        </a>
+      </h2>
       {% if recent_transactions %}
         <ul class="simple-list">
           {% for tx in recent_transactions %}
-            <li>📅 {{ tx.date_time|date:"d M Y" }} — ₹{{ tx.amount }} ({{ tx.category }})</li>
+            <li><i class="fas fa-calendar-alt"></i> {{ tx.date_time|date:"d M Y" }} — ₹{{ tx.amount }} ({{ tx.category }})</li>
           {% endfor %}
         </ul>
       {% else %}
@@ -21,11 +27,15 @@
 
     <!-- Budgets -->
     <section class="card dashboard-section">
-      <h2 class="section-title">💰 This Month's Budgets</h2>
+      <h2 class="section-title">
+        <a href="{% url 'budgets_page' %}">
+          <i class="fas fa-wallet"></i> This Month's Budgets
+        </a>
+      </h2>
       {% if recent_budgets %}
         <ul class="simple-list">
           {% for budget in recent_budgets %}
-            <li>📌 {{ budget.category }} — ₹{{ budget.amount }}</li>
+            <li><i class="fas fa-tag"></i> {{ budget.category }} — ₹{{ budget.amount }}</li>
           {% endfor %}
         </ul>
       {% else %}
@@ -35,11 +45,15 @@
 
     <!-- Goals -->
     <section class="card dashboard-section">
-      <h2 class="section-title">🎯 Goals</h2>
+      <h2 class="section-title">
+        <a href="{% url 'goals_page' %}">
+          <i class="fas fa-bullseye"></i> Goals
+        </a>
+      </h2>
       {% if goals %}
         <ul class="simple-list">
           {% for goal in goals %}
-            <li>🏁 {{ goal.title }} — ₹{{ goal.current_amount }}/₹{{ goal.target_amount }}</li>
+            <li><i class="fas fa-flag-checkered"></i> {{ goal.title }} — ₹{{ goal.current_amount }}/₹{{ goal.target_amount }}</li>
           {% endfor %}
         </ul>
       {% else %}
@@ -49,14 +63,15 @@
 
     <!-- Quick Actions -->
     <section class="card dashboard-section">
-      <h2 class="section-title">🚀 Quick Actions</h2>
+      <h2 class="section-title"><i class="fas fa-bolt"></i> Quick Actions</h2>
       <div class="quick-links">
-        <a href="{% url 'upi_page' %}" class="button">📤 Generate UPI Link</a>
-        <a href="{% url 'sms_page' %}" class="button">📩 Parse SMS Transaction</a>
-        <a href="{% url 'health_score_page' %}" class="button">🧠 Financial Health Score</a>
-        <a href="{% url 'private_mode_page' %}" class="button">🕵️‍♂️ Toggle Private Mode</a>
+        <a href="{% url 'upi_page' %}" class="button"><i class="fas fa-paper-plane"></i> Generate UPI Link</a>
+        <a href="{% url 'sms_page' %}" class="button"><i class="fas fa-sms"></i> Parse SMS Transaction</a>
+        <a href="{% url 'health_score_page' %}" class="button"><i class="fas fa-heartbeat"></i> Financial Health Score</a>
+        <a href="{% url 'private_mode_page' %}" class="button"><i class="fas fa-user-secret"></i> Toggle Private Mode</a>
       </div>
     </section>
+
   </div>
 </div>
 {% endblock %}

@@ -1,31 +1,49 @@
 {% extends 'base.html' %}
 {% block title %}Goals{% endblock %}
+
 {% block content %}
 <div class="page">
-  <h2>Goals</h2>
-  <form method="post" class="form">
-    {% csrf_token %}
-    <label>Title</label>
-    <input type="text" name="title" required>
+  <h2 class="page-title">🎯 Savings Goals</h2>
 
-    <label>Target Amount</label>
-    <input type="number" name="target_amount" required>
+  <div class="card">
+    <form method="post" class="form-grid">
+      {% csrf_token %}
 
-    <label>Saved Amount</label>
-    <input type="number" name="saved_amount" value="0">
+      <div class="form-group">
+        <label for="title">Title</label>
+        <input type="text" id="title" name="title" required>
+      </div>
 
-    <label>Deadline</label>
-    <input type="date" name="deadline" required>
+      <div class="form-group">
+        <label for="target_amount">Target Amount (₹)</label>
+        <input type="number" id="target_amount" name="target_amount" required>
+      </div>
 
-    <button type="submit">Add Goal</button>
-  </form>
-  <hr>
-  <ul class="list">
-    {% for goal in goals %}
-      <li>{{ goal.title }} — ₹{{ goal.saved_amount }} / ₹{{ goal.target_amount }}</li>
-    {% empty %}
-      <li>No goals added yet.</li>
-    {% endfor %}
-  </ul>
+      <div class="form-group">
+        <label for="saved_amount">Saved Amount (₹)</label>
+        <input type="number" id="saved_amount" name="saved_amount" value="0">
+      </div>
+
+      <div class="form-group">
+        <label for="deadline">Deadline</label>
+        <input type="date" id="deadline" name="deadline" required>
+      </div>
+
+      <div class="form-group full-width">
+        <button type="submit" class="btn-primary">➕ Add Goal</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3 class="section-title">Your Goals</h3>
+    <ul class="simple-list">
+      {% for goal in goals %}
+        <li><strong>{{ goal.title }}</strong> — ₹{{ goal.saved_amount }} / ₹{{ goal.target_amount }}</li>
+      {% empty %}
+        <li class="empty">No goals added yet.</li>
+      {% endfor %}
+    </ul>
+  </div>
 </div>
 {% endblock %}

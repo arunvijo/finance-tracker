@@ -11,7 +11,6 @@ urlpatterns = [
     path('', include(router.urls)),
 
     # API Endpoints
-    path('generate-upi-link/', generate_upi, name='generate_upi'),
     path('sms-parser/', sms_parser, name='sms_parser'),
     path('register-api/', register_user_api, name='register_api'),
     path('login-api/', CustomLoginView.as_view(), name='login_api'),
@@ -40,4 +39,6 @@ urlpatterns = [
     path('private/', private_mode_page, name='private_mode_page'),    # ✅ Add this
     path('voice/', voice_transaction_page, name='voice_page'),        # ✅ Add this
     path('scan/', scan_bill_page, name='scan_page'),                  # ✅ Add this
+    path('generate-upi/', generate_upi_page, name='generate_upi_page'),
+
 ]

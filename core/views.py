@@ -205,31 +205,36 @@ def scan_bill_page(request):
 
 
 
-@api_view(['POST'])
+
+@api_view(['GET', 'POST'])
 @permission_classes([permissions.IsAuthenticated])
-def generate_upi(request):
-    upi_id = request.data.get('upi_id')
-    name = request.data.get('name')
-    amount = request.data.get('amount')
-    note = request.data.get('note', '')
+def generate_upi_page(request):
+    if request.method == 'POST':
+        upi_id = request.data.get('upi_id')
+        name = request.data.get('name')
+        amount = request.data.get('amount')
+        note = request.data.get('note', '')
 
-    if not all([upi_id, name, amount]):
-        return Response({'error': 'Missing required fields'}, status=400)
+        if not all([upi_id, name, amount]):
+            return render(request, 'generate_upi.html', {'error': 'Missing required fields'})
 
-    link = generate_upi_link(upi_id, name, amount, note)
+        link = generate_upi_link(upi_id, name, amount, note)
 
-    Transaction.objects.create(
-        user=request.user,
-        type='Expense',
-        amount=amount,
-        category='Other',
-        description=f'Pending GPay to {name}',
-        payment_method='UPI',
-        is_auto_logged=True,
-        status='Pending'
-    )
+        # Save transaction
+        Transaction.objects.create(
+            user=request.user,
+            type='Expense',
+            amount=amount,
+            category='Other',
+            description=f'Pending GPay to {name}',
+            payment_method='UPI',
+            is_auto_logged=True,
+            status='Pending'
+        )
 
-    return Response({'upi_link': link})
+        return render(request, 'generate_upi.html', {'upi_link': link})
+
+    return render(request, 'generate_upi.html')
 
 
 @api_view(['POST'])
