@@ -1,58 +1,212 @@
+# views.py (updated)
+
+from datetime import timedelta
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.utils import timezone
+
 from rest_framework import viewsets, permissions
-from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
-from django.contrib.auth.models import User
-from django.utils import timezone
-from django.contrib.auth import logout
 
-from .models import Transaction, Budget, Goal
+from .models import Transaction, Budget, Goal, RecurringExpense
 from .serializers import TransactionSerializer, BudgetSerializer, GoalSerializer
 from .utils import generate_upi_link, parse_sms_data
 
-from .models import RecurringExpense
-from datetime import timedelta
-
 
 class TransactionViewSet(viewsets.ModelViewSet):
-    queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [TokenAuthentication]
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
     def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
+        return Transaction.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        transaction = serializer.save(user=self.request.user)
+        detect_recurring(self.request.user, transaction.description, transaction.amount)
 
 
 class BudgetViewSet(viewsets.ModelViewSet):
-    queryset = Budget.objects.all()
     serializer_class = BudgetSerializer
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [TokenAuthentication]
 
+    def get_queryset(self):
+        return Budget.objects.filter(user=self.request.user)
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-    def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
-
 
 class GoalViewSet(viewsets.ModelViewSet):
-    queryset = Goal.objects.all()
     serializer_class = GoalSerializer
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [TokenAuthentication]
 
+    def get_queryset(self):
+        return Goal.objects.filter(user=self.request.user)
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-    def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def register_user_api(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+    email = request.data.get('email', '')
+
+    if not username or not password:
+        return Response({'error': 'Username and password are required'}, status=400)
+
+    if User.objects.filter(username=username).exists():
+        return Response({'error': 'Username already exists'}, status=400)
+
+    user = User.objects.create_user(username=username, password=password, email=email)
+    token = Token.objects.create(user=user)
+    return Response({'token': token.key, 'username': user.username})
+
+
+class CustomLoginView(ObtainAuthToken):
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key, 'username': user.username})
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def logout_user(request):
+    request.user.auth_token.delete()
+    logout(request)
+    return Response({'success': 'Logged out'})
+
+
+@login_required
+def logout_view(request):
+    logout(request)
+    messages.success(request, "Logged out successfully \U0001F44B")
+    return redirect('login')
+
+
+# HTML Views
+
+def register(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email', '')
+        password = request.POST.get('password')
+
+        if not username or not password:
+            messages.error(request, 'Username and password are required')
+            return redirect('register')
+
+        if User.objects.filter(username=username).exists():
+            messages.error(request, 'Username already exists ❌')
+            return redirect('register')
+
+        user = User.objects.create_user(username=username, email=email, password=password)
+        Token.objects.get_or_create(user=user)
+        messages.success(request, 'Account created successfully 🎉 Please login.')
+        return redirect('login')
+
+    return render(request, 'register.html')
+
+
+def login_view(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(username=username, password=password)
+
+        if user:
+            login(request, user)
+            Token.objects.get_or_create(user=user)
+            messages.success(request, f'Welcome back, {user.username} \U0001f44b')
+            return redirect('dashboard')
+        else:
+            messages.error(request, 'Invalid username or password ❌')
+            return redirect('login')
+
+    return render(request, 'login.html')
+
+
+@login_required
+def dashboard_view(request):
+    user = request.user
+    now = timezone.now()
+
+    transactions = Transaction.objects.filter(user=user).order_by('-date_time')[:5]
+    budgets = Budget.objects.filter(user=user, month=now.month, year=now.year)
+    goals = Goal.objects.filter(user=user)
+
+    return render(request, 'dashboard.html', {
+        'transactions': transactions,
+        'budgets': budgets,
+        'goals': goals,
+        'username': user.username
+    })
+
+
+@login_required
+def transactions_page(request):
+    transactions = Transaction.objects.filter(user=request.user).order_by('-date_time')
+    return render(request, 'transactions.html', {'transactions': transactions})
+
+
+@login_required
+def budgets_page(request):
+    now = timezone.now()
+    budgets = Budget.objects.filter(user=request.user, month=now.month, year=now.year)
+    return render(request, 'budgets.html', {'budgets': budgets})
+
+
+@login_required
+def goals_page(request):
+    goals = Goal.objects.filter(user=request.user)
+    return render(request, 'goals.html', {'goals': goals})
+
+@login_required
+def upi_page(request):
+    return render(request, 'generate_upi.html')
+
+@login_required
+def sms_page(request):
+    return render(request, 'sms_parser.html')
+
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def health_score_page(request):
+    return render(request, 'health.html')
+
+@login_required
+def private_mode_page(request):
+    return render(request, 'private.html')
+
+@login_required
+def voice_transaction_page(request):
+    return render(request, 'voice_transaction.html')
+
+@login_required
+def scan_bill_page(request):
+    return render(request, 'scan_bill.html')
+
+
+
+
+
+
 
 
 @api_view(['POST'])
@@ -62,6 +216,9 @@ def generate_upi(request):
     name = request.data.get('name')
     amount = request.data.get('amount')
     note = request.data.get('note', '')
+
+    if not all([upi_id, name, amount]):
+        return Response({'error': 'Missing required fields'}, status=400)
 
     link = generate_upi_link(upi_id, name, amount, note)
 
@@ -98,59 +255,29 @@ def sms_parser(request):
             date_time=timezone.now()
         )
         return Response(TransactionSerializer(transaction).data)
+
     return Response({'error': 'Could not parse SMS'}, status=400)
 
-
-@api_view(['POST'])
-@permission_classes([permissions.AllowAny])
-def register_user(request):
-    username = request.data.get('username')
-    password = request.data.get('password')
-    email = request.data.get('email', '')
-
-    if User.objects.filter(username=username).exists():
-        return Response({'error': 'Username already exists'}, status=400)
-
-    user = User.objects.create_user(username=username, password=password, email=email)
-    token = Token.objects.create(user=user)
-    return Response({'token': token.key, 'username': user.username})
-
-
-class CustomLoginView(ObtainAuthToken):
-    def post(self, request, *args, **kwargs):
-        response = super().post(request, *args, **kwargs)
-        token = Token.objects.get(key=response.data['token'])
-        return Response({'token': token.key, 'username': token.user.username})
-
-
-@api_view(['POST'])
-@permission_classes([permissions.IsAuthenticated])
-def logout_user(request):
-    request.user.auth_token.delete()
-    logout(request)
-    return Response({'success': 'Logged out'})
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def suggest_budget(request):
     user = request.user
-    current_month = timezone.now().month
-    current_year = timezone.now().year
-
+    now = timezone.now()
     expenses = Transaction.objects.filter(
         user=user, type='Expense',
-        date_time__year=current_year,
-        date_time__month=current_month
+        date_time__year=now.year,
+        date_time__month=now.month
     )
 
     category_totals = {}
     for tx in expenses:
         category_totals[tx.category] = category_totals.get(tx.category, 0) + float(tx.amount)
 
-    suggestions = []
-    for category, total in category_totals.items():
-        suggested = round(total * 1.1, 2)  # 10% buffer
-        suggestions.append({'category': category, 'suggested_budget': suggested})
+    suggestions = [
+        {'category': cat, 'suggested_budget': round(total * 1.1, 2)}
+        for cat, total in category_totals.items()
+    ]
 
     return Response({'suggestions': suggestions})
 
@@ -163,10 +290,71 @@ def detect_recurring(user, merchant, amount):
         freq = 'Monthly' if 25 <= gap <= 35 else 'Weekly' if 6 <= gap <= 8 else 'Irregular'
         RecurringExpense.objects.update_or_create(
             user=user, merchant=merchant,
-            defaults={'average_amount': avg_amount, 'frequency': freq, 'next_due_date': timezone.now().date() + timedelta(days=gap)}
+            defaults={
+                'average_amount': avg_amount,
+                'frequency': freq,
+                'next_due_date': timezone.now().date() + timedelta(days=gap)
+            }
         )
 
-# Call it in perform_create of TransactionViewSet
-def perform_create(self, serializer):
-    transaction = serializer.save(user=self.request.user)
-    detect_recurring(self.request.user, transaction.description, transaction.amount)
+
+from django.views.decorators.csrf import csrf_exempt
+import random  # For mock score
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def voice_transaction(request):
+    transcript = request.data.get('transcript')
+    if not transcript:
+        return Response({"error": "Transcript missing"}, status=400)
+
+    # Mock response — you can later integrate speech-to-text NLP logic
+    Transaction.objects.create(
+        user=request.user,
+        type='Expense',
+        amount=100,  # Placeholder
+        category='Voice Entry',
+        description=f"Voice log: {transcript}",
+        payment_method='Cash',
+        is_auto_logged=True
+    )
+
+    return Response({"message": "Voice transaction logged", "transcript": transcript})
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def scan_bill(request):
+    bill_text = request.data.get('bill_text')
+    if not bill_text:
+        return Response({"error": "Bill text missing"}, status=400)
+
+    # Mock parsing
+    Transaction.objects.create(
+        user=request.user,
+        type='Expense',
+        amount=250,  # Placeholder
+        category='Bills',
+        description=f"Scanned Bill: {bill_text}",
+        payment_method='Card',
+        is_auto_logged=True
+    )
+
+    return Response({"message": "Bill scanned", "bill_text": bill_text})
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def financial_health_score(request):
+    score = random.randint(50, 95)  # Simulated logic
+    return Response({"score": score})
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def private_mode_toggle(request):
+    # Toggle based on current session
+    status = request.session.get('private_mode', False)
+    new_status = not status
+    request.session['private_mode'] = new_status
+    return Response({"private_mode": new_status})

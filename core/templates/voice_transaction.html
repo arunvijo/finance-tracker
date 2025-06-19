@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Voice Transaction{% endblock %}
+{% block content %}
+<div class="auth-card">
+  <h2>🎤 Voice Transaction</h2>
+  <form id="voiceForm">
+    <textarea name="transcript" placeholder="Paste voice transcript here..." required></textarea>
+    <button type="submit">Log Transaction</button>
+    <p id="voiceResult"></p>
+  </form>
+  <a href="{% url 'dashboard' %}">← Back to Dashboard</a>
+</div>
+
+<script>
+document.getElementById("voiceForm").onsubmit = async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const res = await fetch("/voice-entry/", {
+    method: "POST",
+    headers: { "X-CSRFToken": "{{ csrf_token }}" },
+    body: formData,
+  });
+  const json = await res.json();
+  document.getElementById("voiceResult").innerText = json.message || json.error;
+};
+</script>
+{% endblock %}

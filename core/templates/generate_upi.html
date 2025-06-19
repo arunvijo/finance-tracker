@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Finance Tracker{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+  <h2>Welcome, {{ username }} 👋</h2>
+  <hr>
+
+  <!-- Recent Transactions -->
+  <h3>🧾 Recent Transactions</h3>
+  {% if transactions %}
+    <ul>
+      {% for tx in transactions %}
+        <li>{{ tx.date_time|date:"d M Y" }} - ₹{{ tx.amount }} ({{ tx.category }})</li>
+      {% endfor %}
+    </ul>
+    <a href="{% url 'transactions_page' %}">View All Transactions</a>
+  {% else %}
+    <p>No recent transactions.</p>
+  {% endif %}
+  <hr>
+
+  <!-- Budgets -->
+  <h3>💰 This Month's Budgets</h3>
+  {% if budgets %}
+    <ul>
+      {% for b in budgets %}
+        <li>{{ b.category }} - ₹{{ b.amount }}</li>
+      {% endfor %}
+    </ul>
+    <a href="{% url 'budgets_page' %}">View All Budgets</a>
+  {% else %}
+    <p>No budgets set.</p>
+  {% endif %}
+  <hr>
+
+  <!-- Goals -->
+  <h3>🎯 Goals</h3>
+  {% if goals %}
+    <ul>
+      {% for goal in goals %}
+        <li>{{ goal.title }} — ₹{{ goal.saved_amount }} / ₹{{ goal.target_amount }}</li>
+      {% endfor %}
+    </ul>
+    <a href="{% url 'goals_page' %}">View All Goals</a>
+  {% else %}
+    <p>No active goals.</p>
+  {% endif %}
+  <hr>
+
+  <!-- Feature Links -->
+  <h3>🚀 Quick Actions</h3>
+  <ul>
+    <li><a href="{% url 'upi_page' %}">📤 Generate UPI Link</a></li>
+    <li><a href="{% url 'sms_page' %}">📩 Parse SMS Transaction</a></li>
+    <li><a href="{% url 'health_score_page' %}">🧠 Financial Health Score</a></li>
+    <li><a href="{% url 'private_mode_page' %}">🕵️‍♂️ Toggle Private Mode</a></li>
+  </ul>
+
+  <hr>
+
+  <!-- Logout -->
+  <form method="post" action="{% url 'logout' %}">
+    {% csrf_token %}
+    <button type="submit">Logout</button>
+  </form>
+</div>
+{% endblock %}

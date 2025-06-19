@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Finance Tracker{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Updated stylesheet -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+  <div class="dashboard-container">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="profile">
+        <img src="{% static 'images/profile.png' %}" alt="User" class="profile-img">
+        <h2 class="username">{{ request.user.username|default:"Guest" }}</h2>
+      </div>
+      <nav class="nav-menu">
+        <ul>
+          <li><a href="{% url 'dashboard' %}">🏠 Home</a></li>
+          <li><a href="{% url 'transactions_page' %}">📄 Transactions</a></li>
+          <li><a href="{% url 'budgets_page' %}">💰 Budgets</a></li>
+          <li><a href="{% url 'goals_page' %}">🎯 Goals</a></li>
+          <li><a href="{% url 'upi_page' %}">📤 UPI</a></li>
+          <li><a href="{% url 'sms_page' %}">📩 SMS</a></li>
+          <li><a href="{% url 'health_score_page' %}">🧠 Health</a></li>
+          <li><a href="{% url 'private_mode_page' %}">🕵️ Private</a></li>
+        </ul>
+      </nav>
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button class="logout-button">Logout</button>
+      </form>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      {% block content %}
+      {% endblock %}
+    </main>
+
+  </div>
+
+</body>
+</html>

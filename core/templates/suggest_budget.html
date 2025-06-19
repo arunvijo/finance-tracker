@@ -1,0 +1,18 @@
+<!-- templates/suggest_budget.html -->
+{% extends 'base.html' %}
+{% block title %}Suggested Budget{% endblock %}
+
+{% block content %}
+<div class="utility-card">
+  <h2>Suggested Monthly Budget</h2>
+  {% if suggestions %}
+    <ul>
+      {% for item in suggestions %}
+        <li><strong>{{ item.category }}:</strong> ₹{{ item.suggested_budget }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No suggestions available yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

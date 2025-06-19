@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Transactions{% endblock %}
+{% block content %}
+<div class="page">
+  <h2>Transactions</h2>
+  <form method="post" class="form">
+    {% csrf_token %}
+    <label>Type</label>
+    <select name="type">
+      <option value="Expense">Expense</option>
+      <option value="Income">Income</option>
+    </select>
+
+    <label>Amount</label>
+    <input type="number" name="amount" required>
+
+    <label>Category</label>
+    <select name="category">
+      <option>Food</option>
+      <option>Transport</option>
+      <option>Rent</option>
+      <option>Shopping</option>
+      <option>Health</option>
+      <option>Other</option>
+    </select>
+
+    <label>Description</label>
+    <input type="text" name="description">
+
+    <button type="submit">Add</button>
+  </form>
+  <hr>
+  <ul class="list">
+    {% for tx in transactions %}
+      <li>{{ tx.date_time|date:"d M Y" }} - ₹{{ tx.amount }} ({{ tx.category }})</li>
+    {% empty %}
+      <li>No transactions found.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

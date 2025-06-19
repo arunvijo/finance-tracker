@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Goals{% endblock %}
+{% block content %}
+<div class="page">
+  <h2>Goals</h2>
+  <form method="post" class="form">
+    {% csrf_token %}
+    <label>Title</label>
+    <input type="text" name="title" required>
+
+    <label>Target Amount</label>
+    <input type="number" name="target_amount" required>
+
+    <label>Saved Amount</label>
+    <input type="number" name="saved_amount" value="0">
+
+    <label>Deadline</label>
+    <input type="date" name="deadline" required>
+
+    <button type="submit">Add Goal</button>
+  </form>
+  <hr>
+  <ul class="list">
+    {% for goal in goals %}
+      <li>{{ goal.title }} — ₹{{ goal.saved_amount }} / ₹{{ goal.target_amount }}</li>
+    {% empty %}
+      <li>No goals added yet.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

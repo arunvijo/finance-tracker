@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Private Mode{% endblock %}
+{% block content %}
+<div class="auth-card">
+  <h2>🕵️‍♂️ Private Mode</h2>
+  <button id="togglePrivate">Toggle Private Mode</button>
+  <p id="privateStatus"></p>
+  <a href="{% url 'dashboard' %}">← Back to Dashboard</a>
+</div>
+
+<script>
+document.getElementById("togglePrivate").onclick = async () => {
+  const res = await fetch("/private-mode/", {
+    method: "POST",
+    headers: { "X-CSRFToken": "{{ csrf_token }}" }
+  });
+  const json = await res.json();
+  document.getElementById("privateStatus").innerText = json.private_mode ? "Private Mode Enabled ✅" : "Private Mode Disabled ❌";
+};
+</script>
+{% endblock %}

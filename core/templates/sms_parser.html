@@ -1,0 +1,23 @@
+<!-- templates/sms_parser.html -->
+{% extends 'base.html' %}
+{% block title %}Parse SMS{% endblock %}
+
+{% block content %}
+<div class="utility-card">
+  <h2>Parse Transaction from SMS</h2>
+  <form method="post">
+    {% csrf_token %}
+    <label>SMS Text</label>
+    <textarea name="sms" rows="5" required></textarea>
+    <button type="submit">Parse SMS</button>
+  </form>
+
+  {% if parsed %}
+    <div class="alert success">
+      Parsed Transaction: ₹{{ parsed.amount }} for {{ parsed.description }} ({{ parsed.category }})
+    </div>
+  {% elif error %}
+    <div class="alert error">{{ error }}</div>
+  {% endif %}
+</div>
+{% endblock %}

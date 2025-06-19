@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Health Score{% endblock %}
+{% block content %}
+<div class="auth-card">
+  <h2>🧠 Financial Health Score</h2>
+  <button id="checkScore">Get Score</button>
+  <p id="scoreResult"></p>
+  <a href="{% url 'dashboard' %}">← Back to Dashboard</a>
+</div>
+
+<script>
+document.getElementById("checkScore").onclick = async () => {
+  const res = await fetch("/health-score/");
+  const json = await res.json();
+  document.getElementById("scoreResult").innerText = `Your Score: ${json.score}`;
+};
+</script>
+{% endblock %}
