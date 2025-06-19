@@ -134,3 +134,8 @@ nav a.active {
 .text-link:hover {
   text-decoration: underline;
 }
+
+.main-content.full {
+  margin-left: 0 !important;
+  width: 100%;
+}

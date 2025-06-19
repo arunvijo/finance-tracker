@@ -5,19 +5,18 @@
   <meta charset="UTF-8">
   <title>{% block title %}Finance Tracker{% endblock %}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Updated stylesheet -->
-  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.0">
 </head>
 <body>
 
   <div class="dashboard-container">
 
-    <!-- Sidebar -->
+    {% if request.user.is_authenticated %}
+    <!-- Sidebar (Only visible if logged in) -->
     <aside class="sidebar">
       <div class="profile">
         <img src="{% static 'images/profile.png' %}" alt="User" class="profile-img">
-        <h2 class="username">{{ request.user.username|default:"Guest" }}</h2>
+        <h2 class="username">{{ request.user.username }}</h2>
       </div>
       <nav class="nav-menu">
         <ul>
@@ -36,9 +35,10 @@
         <button class="logout-button">Logout</button>
       </form>
     </aside>
+    {% endif %}
 
     <!-- Main Content Area -->
-    <main class="main-content">
+    <main class="main-content {% if not request.user.is_authenticated %}full{% endif %}">
       {% block content %}
       {% endblock %}
     </main>
