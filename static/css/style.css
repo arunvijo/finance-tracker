@@ -67,39 +67,83 @@ nav a.active {
 }
 
 /* Main Content */
+
 .main-content {
-  margin-left: 240px;
+  margin-left: 260px; /* Leave space for the sidebar */
+  margin-top: 10px;
   padding: 2rem;
+  width: calc(100% - 220px);
+  box-sizing: border-box;
 }
 
+/* Full-width when no sidebar (e.g., not authenticated) */
 .main-content.full {
-  margin-left: 0 !important;
+  margin-left: 0;
   width: 100%;
+  max-width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    padding: 1rem 0.5rem;
+    align-items: flex-start;
+  }
+
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 1rem;
+  }
+
+  .dashboard-container {
+    flex-direction: column;
+  }
 }
 
 /* Cards & Sections */
-.card, .auth-card, .dashboard-section {
+.card,
+.auth-card,
+.dashboard-section {
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 2rem;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
 }
 
+/* Card Grid Layout */
 .card-grid {
   display: flex;
-  gap: 2rem;
   flex-wrap: wrap;
+  gap: 2rem;
 }
 
+/* Half-width card for larger screens */
 .card.half {
-  flex: 1 1 45%;
+  flex: 1 1 calc(50% - 1rem); /* Leaves 2rem total gap */
 }
 
+/* Full-width card always spans 100% */
 .card.full {
-  width: 100%;
+  flex: 1 1 100%;
 }
+
+/* Responsive: Stack all cards on mobile */
+@media (max-width: 768px) {
+  .card.half,
+  .card.full {
+    flex: 1 1 100%;
+  }
+}
+
 
 /* Dashboard */
 .page-title {
@@ -359,10 +403,6 @@ textarea:focus {
     border-bottom: 1px solid #ddd;
   }
 
-  .main-content {
-    margin-left: 0;
-    padding: 1rem;
-  }
 
   .card, .auth-box {
     padding: 1.2rem;
@@ -395,7 +435,6 @@ textarea:focus {
 .dashboard-container {
   display: flex;
   flex-direction: row;
-  min-height: 100vh;
 }
 
 /* Sidebar Styling Updates */
@@ -489,25 +528,10 @@ textarea:focus {
   .logout-button {
     display: none; /* Hide on mobile, or customize if needed */
   }
-
-  .main-content {
-    margin-left: 0 !important;
-    padding: 1rem;
-  }
 }
 
 
-:root {
-  --bg: #f9f9f9;
-  --text: #222;
-  --card-bg: #ffffff;
-  --border: #e2e8f0;
-  --link: #2563eb;
-  --link-hover: #1e40af;
-  --alert-success: #d1fae5;
-  --alert-error: #fee2e2;
-  --page-title: #1f2937
-}
+
 
 
 body {
@@ -537,6 +561,19 @@ a:hover, .text-link:hover, .auth-footer a:hover {
 }
 
 /* Root dark theme styles */
+:root {
+  --bg: #f9f9f9;
+  --text: #222;
+  --card-bg: #ffffff;
+  --border: #e2e8f0;
+  --link: #2563eb;
+  --link-hover: #1e40af;
+  --alert-success: #d1fae5;
+  --alert-error: #fee2e2;
+  --page-title: #1f2937
+}
+
+
 .dark-theme {
   --bg: #1e1e2f;
   --fg: #f0f0f0;
