@@ -16,6 +16,8 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from .models import Transaction, Budget, Goal, Profile
 from .serializers import TransactionSerializer, BudgetSerializer, GoalSerializer
 from .utils import generate_upi_link
+from django.utils.dateformat import DateFormat
+from django.utils.timezone import localtime
 
 # ──────── ViewSets ──────── #
 
@@ -122,16 +124,46 @@ def login_view(request):
 
 # ──────── HTML Dashboard Views ──────── #
 
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from django.utils.timezone import now
+from .models import Transaction, Budget, Goal, RecurringExpense
+
 @login_required
 def dashboard_view(request):
-    recent_transactions = Transaction.objects.filter(user=request.user).order_by('-date_time')[:5]
-    recent_budgets = Budget.objects.filter(user=request.user).order_by('-id')[:5]
-    goals = Goal.objects.filter(user=request.user).order_by('-id')[:5]
-    return render(request, 'dashboard.html', {
+    user = request.user
+    # 1. Recent data for cards
+    recent_transactions = Transaction.objects.filter(user=user).order_by('-date_time')[:5]
+    recent_budgets = Budget.objects.filter(user=user).order_by('-id')[:5]
+    goals = Goal.objects.filter(user=user).order_by('-id')[:5]
+    recurring_expenses = RecurringExpense.objects.filter(user=user).order_by('next_due_date')
+
+    # 2. Graph data: last 7 transactions (oldest to newest)
+    tx_query = Transaction.objects.filter(user=user).order_by('-date_time')[:7][::-1]
+    tx_labels = [tx.date_time.strftime('%d %b') for tx in tx_query]
+    tx_amounts = [float(tx.amount) for tx in tx_query]
+
+    # 3. Graph data: current month budgets
+    current_month = now().month
+    current_year = now().year
+    budgets = Budget.objects.filter(user=user, month=current_month, year=current_year)
+    budget_labels = [budget.category for budget in budgets]
+    budget_amounts = [float(budget.amount) for budget in budgets]
+
+    context = {
         'recent_transactions': recent_transactions,
         'recent_budgets': recent_budgets,
         'goals': goals,
-    })
+        'recurring_expenses': recurring_expenses,
+        'tx_labels': tx_labels,
+        'tx_amounts': tx_amounts,
+        'budget_labels': budget_labels,
+        'budget_amounts': budget_amounts,
+    }
+
+    return render(request, 'dashboard.html', context)
+
 
 
 @login_required

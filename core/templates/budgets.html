@@ -3,16 +3,9 @@
 
 {% block content %}
 <div class="page">
-  {% if messages %}
-  <div class="messages">
-    {% for message in messages %}
-      <div class="alert {{ message.tags }}">{{ message }}</div>
-    {% endfor %}
-  </div>
-{% endif %}
-
+  <h2>Add Budget</h2>
   <div class="card full">
-    <h2>📊 Add Budget</h2>
+    
     <form method="post" class="form">
       {% csrf_token %}
       <label for="category">Category</label>

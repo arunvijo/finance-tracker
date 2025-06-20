@@ -1,23 +1,88 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
 <div class="dashboard">
   <h1 class="page-title">Welcome, {{ request.user.username }} 👋</h1>
 
-  <div class="dashboard-grid">
+  <!-- Charts Section (Top) -->
+  <div class="charts-section">
+    <div class="card dashboard-section full">
+      <h2 class="section-title"><i class="fas fa-chart-line"></i> Spending Overview</h2>
+      {% if tx_labels and tx_amounts %}
+        <canvas id="transactionChart" height="140"></canvas>
+      {% else %}
+        <p class="empty">Not enough data to display transaction chart.</p>
+      {% endif %}
+    </div>
+
+    <div class="card dashboard-section full">
+      <h2 class="section-title"><i class="fas fa-chart-pie"></i> Budget Allocation</h2>
+      {% if budget_labels and budget_amounts %}
+        <canvas id="budgetChart" height="140"></canvas>
+      {% else %}
+        <p class="empty">No budget data available for chart.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Details Section (Bottom) -->
+  <div class="details-section dashboard-grid">
+
+    <!-- Goals -->
+    <section class="card dashboard-section full">
+      <h2 class="section-title">
+        <a href="{% url 'goals_page' %}"><i class="fas fa-bullseye"></i> Goals</a>
+      </h2>
+      {% if goals %}
+        <ul class="simple-list">
+          {% for goal in goals %}
+            <li>
+              <strong><i class="fas fa-flag-checkered"></i> {{ goal.title }}</strong><br>
+              <progress value="{{ goal.saved_amount }}" max="{{ goal.target_amount }}"></progress>
+              ₹{{ goal.saved_amount }} / ₹{{ goal.target_amount }}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty">No active goals.</p>
+      {% endif %}
+    </section>
+
+    <!-- Recurring Expenses -->
+    <section class="card dashboard-section full">
+      <h2 class="section-title"><i class="fas fa-sync-alt"></i> Recurring Expenses</h2>
+      {% if recurring_expenses %}
+        <ul class="simple-list">
+          {% for rec in recurring_expenses %}
+            <li><i class="fas fa-calendar"></i> {{ rec.merchant }} — ₹{{ rec.average_amount }} ({{ rec.frequency }}) — Next: {{ rec.next_due_date }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty">No recurring expenses tracked.</p>
+      {% endif %}
+    </section>
+
+    <!-- Quick Actions -->
+    <section class="card dashboard-section full">
+      <h2 class="section-title"><i class="fas fa-bolt"></i> Quick Actions</h2>
+      <div class="quick-links">
+        <a href="{% url 'upi_page' %}" class="button"><i class="fas fa-paper-plane"></i> Generate UPI Link</a>
+      </div>
+    </section>
 
     <!-- Recent Transactions -->
     <section class="card dashboard-section">
-      <h2 class="section-title">
-        <a href="{% url 'transactions_page' %}">
-          <i class="fas fa-receipt"></i> Recent Transactions
-        </a>
-      </h2>
+      <h2 class="section-title"><a href="{% url 'transactions_page' %}"><i class="fas fa-receipt"></i> Recent Transactions</a></h2>
       {% if recent_transactions %}
         <ul class="simple-list">
           {% for tx in recent_transactions %}
-            <li><i class="fas fa-calendar-alt"></i> {{ tx.date_time|date:"d M Y" }} — ₹{{ tx.amount }} ({{ tx.category }})</li>
+            <li>
+              <i class="fas fa-calendar-alt"></i> {{ tx.date_time|date:"d M Y" }} —
+              ₹{{ tx.amount }} ({{ tx.category }})
+              <span class="badge {{ tx.status|lower }}">{{ tx.status }}</span>
+            </li>
           {% endfor %}
         </ul>
       {% else %}
@@ -25,13 +90,9 @@
       {% endif %}
     </section>
 
-    <!-- Budgets -->
+    <!-- Recent Budgets -->
     <section class="card dashboard-section">
-      <h2 class="section-title">
-        <a href="{% url 'budgets_page' %}">
-          <i class="fas fa-wallet"></i> This Month's Budgets
-        </a>
-      </h2>
+      <h2 class="section-title"><a href="{% url 'budgets_page' %}"><i class="fas fa-wallet"></i> This Month's Budgets</a></h2>
       {% if recent_budgets %}
         <ul class="simple-list">
           {% for budget in recent_budgets %}
@@ -43,32 +104,66 @@
       {% endif %}
     </section>
 
-    <!-- Goals -->
-    <section class="card dashboard-section">
-      <h2 class="section-title">
-        <a href="{% url 'goals_page' %}">
-          <i class="fas fa-bullseye"></i> Goals
-        </a>
-      </h2>
-      {% if goals %}
-        <ul class="simple-list">
-          {% for goal in goals %}
-            <li><i class="fas fa-flag-checkered"></i> {{ goal.title }} — ₹{{ goal.current_amount }}/₹{{ goal.target_amount }}</li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p class="empty">No active goals.</p>
-      {% endif %}
-    </section>
-
-    <!-- Quick Actions -->
-    <section class="card dashboard-section">
-      <h2 class="section-title"><i class="fas fa-bolt"></i> Quick Actions</h2>
-      <div class="quick-links">
-        <a href="{% url 'upi_page' %}" class="button"><i class="fas fa-paper-plane"></i> Generate UPI Link</a>
-      </div>
-    </section>
-
   </div>
 </div>
+
+<!-- Safe Chart Data Embed (already safe from views.py) -->
+<script id="txLabels" type="application/json">{{ tx_labels }}</script>
+<script id="txAmounts" type="application/json">{{ tx_amounts }}</script>
+<script id="budgetLabels" type="application/json">{{ budget_labels }}</script>
+<script id="budgetAmounts" type="application/json">{{ budget_amounts }}</script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const txLabels = JSON.parse(document.getElementById('txLabels').textContent);
+  const txAmounts = JSON.parse(document.getElementById('txAmounts').textContent);
+  const budgetLabels = JSON.parse(document.getElementById('budgetLabels').textContent);
+  const budgetAmounts = JSON.parse(document.getElementById('budgetAmounts').textContent);
+
+  if (txLabels.length && txAmounts.length) {
+    new Chart(document.getElementById('transactionChart').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: txLabels,
+        datasets: [{
+          label: 'Spending (₹)',
+          data: txAmounts,
+          backgroundColor: '#2563eb',
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  }
+
+  if (budgetLabels.length && budgetAmounts.length) {
+    new Chart(document.getElementById('budgetChart').getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: budgetLabels,
+        datasets: [{
+          label: 'Budget (₹)',
+          data: budgetAmounts,
+          backgroundColor: [
+            '#2563eb', '#facc15', '#10b981', '#f472b6', '#f97316',
+            '#34d399', '#c084fc', '#f87171', '#60a5fa'
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom' }
+        }
+      }
+    });
+  }
+</script>
 {% endblock %}

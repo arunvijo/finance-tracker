@@ -2,12 +2,13 @@
 {% block title %}Generate UPI Link - Finance Tracker{% endblock %}
 
 {% block content %}
-<div class="card">
-  <h2 class="page-title">📤 Generate UPI Payment Link</h2>
 
-  {% if upi_link %}
+<div class="page">
+  <h2 class="page-title">Generate UPI Payment Link</h2>
+  <div class="card">
+    {% if upi_link %}
     <div class="alert success">
-      ✅ UPI Link Generated:
+      UPI Link Generated:
       <br>
       <a href="{{ upi_link }}" target="_blank" class="text-link">{{ upi_link }}</a>
     </div>
@@ -41,5 +42,6 @@
       <button type="submit" class="btn-primary">Generate Link</button>
     </div>
   </form>
+</div>
 </div>
 {% endblock %}

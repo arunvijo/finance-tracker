@@ -3,16 +3,7 @@
 
 {% block content %}
 <div class="page">
-  <h2 class="page-title">🎯 Savings Goals</h2>
-  {% if messages %}
-  <div class="messages">
-    {% for message in messages %}
-      <div class="alert {{ message.tags }}">{{ message }}</div>
-    {% endfor %}
-  </div>
-{% endif %}
-
-
+  <h2 class="page-title">Savings Goals</h2>
   <div class="card">
     <form method="post" class="form-grid">
       {% csrf_token %}
