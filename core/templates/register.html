@@ -16,8 +16,10 @@
       </div>
     {% endif %}
 
-    <form method="post" action="{% url 'register' %}" class="auth-form">
+    <!-- 🟡 enctype added for file upload -->
+    <form method="post" action="{% url 'register' %}" class="auth-form" enctype="multipart/form-data">
       {% csrf_token %}
+
       <label for="username">Username</label>
       <input type="text" id="username" name="username" required>
 
@@ -26,6 +28,10 @@
 
       <label for="password">Password</label>
       <input type="password" id="password" name="password" required>
+
+      <!-- 🟢 Profile Image Upload -->
+      <label for="profile_image">Profile Image</label>
+      <input type="file" id="profile_image" name="profile_image" accept="image/*">
 
       <button type="submit" class="btn-login">📝 Register</button>
     </form>

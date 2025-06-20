@@ -25,7 +25,7 @@
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="profile">
-        <img src="{% static 'images/profile.png' %}" alt="User" class="profile-img">
+        <img src="{% if request.user.profile.profile_image %}{{ request.user.profile.profile_image.url }}{% else %}{% static 'images/profile.png' %}{% endif %}" alt="User" class="profile-img">
         <h2 class="username">{{ request.user.username }}</h2>
       </div>
       <nav class="nav-menu">
@@ -35,9 +35,6 @@
           <li><a href="{% url 'budgets_page' %}"><i class="fas fa-wallet"></i> Budgets</a></li>
           <li><a href="{% url 'goals_page' %}"><i class="fas fa-bullseye"></i> Goals</a></li>
           <li><a href="{% url 'upi_page' %}"><i class="fas fa-paper-plane"></i> UPI</a></li>
-          <li><a href="{% url 'sms_page' %}"><i class="fas fa-sms"></i> SMS</a></li>
-          <li><a href="{% url 'health_score_page' %}"><i class="fas fa-heartbeat"></i> Health</a></li>
-          <li><a href="{% url 'private_mode_page' %}"><i class="fas fa-user-secret"></i> Private</a></li>
         </ul>
       </nav>
       <form method="post" action="{% url 'logout' %}">

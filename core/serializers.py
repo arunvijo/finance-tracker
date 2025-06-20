@@ -24,9 +24,12 @@ class GoalSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class UserSerializer(serializers.ModelSerializer):
+    profile_image = serializers.ImageField(source='profile.profile_image', read_only=True)
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'email']
+        fields = ['id', 'username', 'email', 'profile_image']
+
 
 class RecurringExpenseSerializer(serializers.ModelSerializer):
     class Meta:
