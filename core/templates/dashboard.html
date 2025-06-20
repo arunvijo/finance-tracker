@@ -6,31 +6,28 @@
 <div class="dashboard">
   <h1 class="page-title">Welcome, {{ request.user.username }} 👋</h1>
 
-  <!-- Charts Section (Top) -->
-  <div class="charts-section">
-    <div class="card dashboard-section full">
+  <div class="dashboard-grid">
+    <!-- Transaction Chart -->
+    <section class="card dashboard-section full">
       <h2 class="section-title"><i class="fas fa-chart-line"></i> Spending Overview</h2>
       {% if tx_labels and tx_amounts %}
-        <canvas id="transactionChart" height="140"></canvas>
+        <canvas id="transactionChart" height="120"></canvas>
       {% else %}
         <p class="empty">Not enough data to display transaction chart.</p>
       {% endif %}
-    </div>
+    </section>
 
-    <div class="card dashboard-section full">
+    <!-- Budget Chart -->
+    <section class="card dashboard-section full">
       <h2 class="section-title"><i class="fas fa-chart-pie"></i> Budget Allocation</h2>
       {% if budget_labels and budget_amounts %}
-        <canvas id="budgetChart" height="140"></canvas>
+        <canvas id="budgetChart" height="120"></canvas>
       {% else %}
         <p class="empty">No budget data available for chart.</p>
       {% endif %}
-    </div>
-  </div>
+    </section>
 
-  <!-- Details Section (Bottom) -->
-  <div class="details-section dashboard-grid">
-
-    <!-- Goals -->
+    <!-- Goals Section with Progress -->
     <section class="card dashboard-section full">
       <h2 class="section-title">
         <a href="{% url 'goals_page' %}"><i class="fas fa-bullseye"></i> Goals</a>
@@ -41,7 +38,7 @@
             <li>
               <strong><i class="fas fa-flag-checkered"></i> {{ goal.title }}</strong><br>
               <progress value="{{ goal.saved_amount }}" max="{{ goal.target_amount }}"></progress>
-              ₹{{ goal.saved_amount }} / ₹{{ goal.target_amount }}
+              ₹{{ goal.saved_amount }} / ₹{{ goal.target_amount }} (by {{ goal.deadline }})
             </li>
           {% endfor %}
         </ul>
@@ -55,12 +52,14 @@
       <h2 class="section-title"><i class="fas fa-sync-alt"></i> Recurring Expenses</h2>
       {% if recurring_expenses %}
         <ul class="simple-list">
-          {% for rec in recurring_expenses %}
-            <li><i class="fas fa-calendar"></i> {{ rec.merchant }} — ₹{{ rec.average_amount }} ({{ rec.frequency }}) — Next: {{ rec.next_due_date }}</li>
+          {% for r in recurring_expenses %}
+            <li><i class="fas fa-calendar"></i> {{ r.merchant }} — ₹{{ r.average_amount }} ({{ r.frequency }})<br>
+              Next Due: {{ r.next_due_date }} | Last Detected: {{ r.last_detected|date:"d M Y H:i" }}
+            </li>
           {% endfor %}
         </ul>
       {% else %}
-        <p class="empty">No recurring expenses tracked.</p>
+        <p class="empty">No recurring expenses detected.</p>
       {% endif %}
     </section>
 
@@ -71,49 +70,14 @@
         <a href="{% url 'upi_page' %}" class="button"><i class="fas fa-paper-plane"></i> Generate UPI Link</a>
       </div>
     </section>
-
-    <!-- Recent Transactions -->
-    <section class="card dashboard-section">
-      <h2 class="section-title"><a href="{% url 'transactions_page' %}"><i class="fas fa-receipt"></i> Recent Transactions</a></h2>
-      {% if recent_transactions %}
-        <ul class="simple-list">
-          {% for tx in recent_transactions %}
-            <li>
-              <i class="fas fa-calendar-alt"></i> {{ tx.date_time|date:"d M Y" }} —
-              ₹{{ tx.amount }} ({{ tx.category }})
-              <span class="badge {{ tx.status|lower }}">{{ tx.status }}</span>
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p class="empty">No recent transactions.</p>
-      {% endif %}
-    </section>
-
-    <!-- Recent Budgets -->
-    <section class="card dashboard-section">
-      <h2 class="section-title"><a href="{% url 'budgets_page' %}"><i class="fas fa-wallet"></i> This Month's Budgets</a></h2>
-      {% if recent_budgets %}
-        <ul class="simple-list">
-          {% for budget in recent_budgets %}
-            <li><i class="fas fa-tag"></i> {{ budget.category }} — ₹{{ budget.amount }}</li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p class="empty">No budgets set.</p>
-      {% endif %}
-    </section>
-
   </div>
 </div>
 
-<!-- Safe Chart Data Embed (already safe from views.py) -->
-<script id="txLabels" type="application/json">{{ tx_labels }}</script>
-<script id="txAmounts" type="application/json">{{ tx_amounts }}</script>
-<script id="budgetLabels" type="application/json">{{ budget_labels }}</script>
-<script id="budgetAmounts" type="application/json">{{ budget_amounts }}</script>
+{{ tx_labels|json_script:"txLabels" }}
+{{ tx_amounts|json_script:"txAmounts" }}
+{{ budget_labels|json_script:"budgetLabels" }}
+{{ budget_amounts|json_script:"budgetAmounts" }}
 
-<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   const txLabels = JSON.parse(document.getElementById('txLabels').textContent);
@@ -122,12 +86,13 @@
   const budgetAmounts = JSON.parse(document.getElementById('budgetAmounts').textContent);
 
   if (txLabels.length && txAmounts.length) {
-    new Chart(document.getElementById('transactionChart').getContext('2d'), {
+    const transactionCtx = document.getElementById('transactionChart').getContext('2d');
+    new Chart(transactionCtx, {
       type: 'bar',
       data: {
         labels: txLabels,
         datasets: [{
-          label: 'Spending (₹)',
+          label: 'Amount (₹)',
           data: txAmounts,
           backgroundColor: '#2563eb',
           borderRadius: 6
@@ -144,24 +109,20 @@
   }
 
   if (budgetLabels.length && budgetAmounts.length) {
-    new Chart(document.getElementById('budgetChart').getContext('2d'), {
+    const budgetCtx = document.getElementById('budgetChart').getContext('2d');
+    new Chart(budgetCtx, {
       type: 'doughnut',
       data: {
         labels: budgetLabels,
         datasets: [{
           label: 'Budget (₹)',
           data: budgetAmounts,
-          backgroundColor: [
-            '#2563eb', '#facc15', '#10b981', '#f472b6', '#f97316',
-            '#34d399', '#c084fc', '#f87171', '#60a5fa'
-          ]
+          backgroundColor: ['#2563eb', '#facc15', '#10b981', '#f472b6', '#f97316', '#34d399', '#c084fc', '#f87171', '#60a5fa']
         }]
       },
       options: {
         responsive: true,
-        plugins: {
-          legend: { position: 'bottom' }
-        }
+        plugins: { legend: { position: 'bottom' } }
       }
     });
   }
